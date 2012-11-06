@@ -1,0 +1,56 @@
+<!--Ant build script for Driverciser -->
+
+<project name="driverciser" default="all" basedir=".">
+
+    <property name="build" value="classes" />
+    <property name="temp" value="temp" />
+    <property name="conf" value="conf"/>
+    <property name="etc" value="etc"/>
+    <property name="lib" value="lib"/>
+    <property name="src" value="src"/>
+    <property name="jarfile" value="driverciser.jar"/>
+    <property name="log4jprops" value="log4j.properties" />
+    <property name="metainf" value="**/META-INF/" />
+
+    <path id="compilerPath">
+        <pathelement path="${lib}/javaforge.jar:${lib}/log4j.jar:${lib}/activation.jar:${lib}/imap.jar:${lib}/mailapi.jar:${lib}/mail.jar:${lib}/pop3.jar:${lib}/smtp.jar"/>
+    </path>
+
+    <target name="compile">
+        <mkdir dir="${build}"/>
+        <javac srcdir="${src}" destdir="${build}" debug="on">
+            <classpath refid="compilerPath"/>
+        </javac>
+    </target>
+
+    <target name="build-jar" depends="compile">
+    	<mkdir dir="${temp}"/>
+        <!-- expand library jars -->
+        <unjar dest="${temp}">
+            <patternset>
+                <exclude name="${metainf}" />
+            </patternset>
+            <fileset dir="${lib}">
+                <include name="**/*.jar" />
+            </fileset>
+        </unjar>
+        <!-- copy properties files -->
+        <copy todir="${temp}">
+            <fileset dir="${conf}"/>
+        </copy>
+        <copy todir="${temp}">
+            <fileset dir="${build}"/>
+        </copy>
+        <!-- jar it up -->
+        <jar destfile="${jarfile}" basedir="${temp}" manifest="${etc}/MainClass" />
+    </target>
+
+    <target name="all" depends="clean,compile,build-jar"/>
+
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete file="${jarfile}"/>
+        <delete dir="${temp}"/>
+    </target>
+
+</project>
